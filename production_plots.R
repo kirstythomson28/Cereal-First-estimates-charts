@@ -104,7 +104,7 @@ Crop <- ggplot(df, aes(Year)) +
   ) +
   annotate(
     "text",
-    x = CurrentYear - 2.5, y = 3250000, label = "Total cereals production", size = 6, color = "#00833E"
+    x = CurrentYear - 2.5, y = 3300000, label = "Total cereals production", size = 6, color = "#00833E"
   ) +
   labs(
     title = "", y = "Thousand tonnes", x = "Year"
@@ -154,7 +154,7 @@ Crop <- ggplot(df, aes(Year)) +
   ) +
   annotate(
     "text",
-    x = CurrentYear-8, y = 220000, label = "Ten year average", size = 6, color = "#575756"
+    x = CurrentYear-8, y = 450000, label = "Ten year average", size = 6, color = "#575756"
   ) +
   scale_y_continuous(
     labels = scales::label_comma(scale = 1 / 1000, prefix = "", suffix = "", accuracy = 1, big.mark = ","), limits = c(0, 2000000), breaks = c(0, 500000, 1000000, 1500000, 2000000)
@@ -182,7 +182,7 @@ Crop <- ggplot(df, aes(Year)) +
   )+
   annotate(
     "text",
-    x = CurrentYear-2, y = 1900000, label = "Spring barley production", size = 6, color = "#00833E"
+    x = CurrentYear-2.85, y = 1750000, label = "Spring barley production", size = 6, color = "#00833E"
   ) +
   geom_line(data=subset(df, Year<CurrentYear),
             aes(y = W_Barley_Production),
@@ -198,13 +198,13 @@ Crop <- ggplot(df, aes(Year)) +
   )+
   annotate(
     "text",
-    x = CurrentYear, y = df$W_Barley_Production[df$Year==CurrentYear]-100000, 
+    x = CurrentYear, y = df$W_Barley_Production[df$Year==CurrentYear]+100000, 
     label = paste0(round(df$W_Barley_Production[df$Year==CurrentYear],-3)/1000), 
     size = 6, color = "#00833E"
   )+
   annotate(
     "text",
-    x = CurrentYear-2, y =  490000, label = "Winter barley production", size = 6, color = "#00833E"
+    x = CurrentYear-2.85, y =  480000, label = "Winter barley production", size = 6, color = "#00833E"
   ) +
   labs(
     title = "",  y = "Thousand tonnes", x = "Year"
@@ -386,7 +386,7 @@ Crop <- ggplot(df, aes(Year)) +
   ) +
   annotate(
     "text",
-    x = CurrentYear-5.75, y = 140000, label = "Ten year average", size = 6, color = "#575756"
+    x = CurrentYear-5.75, y = 145000, label = "Ten year average", size = 6, color = "#575756"
   ) +
   scale_y_continuous(
     labels = scales::label_comma(scale = 1 / 1000, prefix = "", suffix = "", accuracy = 1, big.mark = ","), limits = c(0, 200000)
@@ -408,13 +408,13 @@ Crop <- ggplot(df, aes(Year)) +
   )+
   annotate(
     "text",
-    x = CurrentYear, y = df$OSR_Production[df$Year==CurrentYear]-12000, 
+    x = CurrentYear, y = df$OSR_Production[df$Year==CurrentYear]+12000, 
     label = format((round(df$OSR_Production[df$Year==CurrentYear],-3)/1000), big.mark=","), 
     size = 6, color = "#00833E"
   )+
   annotate(
     "text",
-    x = CurrentYear-2, y = 170000, label = "Oilseed rape production", size = 6, color = "#00833E"
+    x = CurrentYear-2.5, y = 175000, label = "Oilseed rape production", size = 6, color = "#00833E"
   ) +
   labs(
     title = "", y = "Thousand tonnes", x = "Year"
