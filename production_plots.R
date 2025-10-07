@@ -42,7 +42,6 @@ production <- ch_data %>%
   select(c(Year, contains("production"))) %>%
   filter(Year > (CurrentYear-10))
 
-# ALEX - Reformat the way plots are created ###################################################################################################
 
 df <- data.frame(production$Year, production$Cereals_Production) %>%
   setNames(c("Year", "Cereals_Production"))
