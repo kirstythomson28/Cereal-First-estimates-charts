@@ -69,14 +69,14 @@ Crop <- ggplot(df_total_cereals, aes(Year)) +
   geom_line(
     data = subset(df_total_cereals, Year < CurrentYear),
     aes(y = Cereals_Production, color = "Total cereals production"),
-    size = 1.5, linetype = "solid"
+    size = 2, linetype = "solid"
   ) +
   
   # Cereals production: recent/projection (dashed)
   geom_line(
     data = subset(df_total_cereals, Year > CurrentYear - 2),
     aes(y = Cereals_Production, color = "Total cereals production"),
-    size = 1.5, linetype = "11"
+    size = 2, linetype = "11"
   ) +
   
   # Current year point (excluded from legend)
@@ -209,11 +209,11 @@ Crop <- ggplot(df_barley, aes(Year)) +
   ) +
   geom_line(data=subset(df_barley, Year<CurrentYear),
             aes(y = S_Barley_Production),
-            color = "#00833E", size = 1.75, linetype = "solid"
+            color = "#00833E", size = 2, linetype = "solid"
   ) +
   geom_line(data=subset(df_barley, Year>CurrentYear-2),
             aes(y = S_Barley_Production),
-            color = "#00833E", size = 1.75, linetype = '11'
+            color = "#00833E", size = 2, linetype = '11'
   ) +
   geom_point(data=subset(df_barley, Year==CurrentYear),
              aes(y = S_Barley_Production),
@@ -231,11 +231,11 @@ Crop <- ggplot(df_barley, aes(Year)) +
   ) +
   geom_line(data=subset(df_barley, Year<CurrentYear),
             aes(y = W_Barley_Production),
-            color = "#00833E", size = 1.75, linetype = "solid"
+            color = "#00833E", size = 2, linetype = "solid"
   ) +  
   geom_line(data=subset(df_barley, Year>CurrentYear-2),
             aes(y = W_Barley_Production),
-            color = "#00833E", size = 1.75, linetype = '11'
+            color = "#00833E", size = 2, linetype = '11'
   ) +
   geom_point(data=subset(df_barley, Year==CurrentYear),
              aes(y = W_Barley_Production),
@@ -273,8 +273,8 @@ Crop
 ggsave(filename = paste0("CH_",CurrentYear,"_barley_production.svg"), plot = Crop, width = SVGWidth, height = SVGHeight, units = "mm", dpi = 320, bg = "white")
 
 
-####################################################################################################
-# Alex - Oats Crop
+################################################################################
+#################################### Oats Crop #################################
 
 df_oats <- ch_data %>%
   select(c(Year, contains("Oats_Production"))) %>%
@@ -291,15 +291,58 @@ Crop <- ggplot(df_oats, aes(Year)) +
     data = df_oats_mean_5yr,
     aes(
       x = 2020, xend = 2025,
-      y = Oats_Production, yend = Oats_Production
+      y = Oats_Production, yend = Oats_Production,
+      color = "Five-year average (2020:2024)"
     ),
-    color = "#575756", linetype = "solid", size = 0.75
+    size = 0.75
   ) +
-  annotate(
-    "text",
-    x = 2022.5, y = df_oats_mean_5yr$Oats_Production + 12000,
-    label = "Five-year average",
-    size = 6, color = "#575756"
+  # Oats production: past (solid)
+  geom_line(data=subset(df_oats, Year < CurrentYear),
+            aes(y = Oats_Production, colour = "Oats production"),
+            size = 2, linetype = "solid"
+  ) +
+  # Cereals production: recent/projection (dashed)
+  geom_line(data=subset(df_oats, Year>CurrentYear-2),
+            aes(y = Oats_Production, colour = "Oats production"),
+            size = 2, linetype = "solid"
+  ) +
+  # Current year point (excluded from legend)
+  geom_point(data=subset(df_oats, Year==CurrentYear),
+             aes(y = Oats_Production, colour = "Oats production"),
+             size = 5,
+             show.legend = FALSE
+  )+
+  # Current year label (excluded from legend)
+  geom_text(
+    data = subset(df_oats, Year == CurrentYear),
+    aes(
+      y = Oats_Production,
+      label = format((round(Oats_Production, -3) / 1000), big.mark = ","),
+      color = "Oats production"
+    ),
+    size = 6, vjust = -1,
+    show.legend = FALSE
+  ) +
+  
+  # Make legend text same color as lines
+  guides(
+    color = guide_legend(
+      override.aes = list(
+        color = c("#00833E", "black")   # match legend key colors
+      )
+    )
+  ) +
+  # Manual legend colors
+  scale_color_manual(
+    name = NULL,
+    values = c(
+      "Oats production" = "#00833E",
+      "Five-year average (2020:2024)" = "black"
+    ),
+    breaks = c(
+      "Oats production",
+      "Five-year average (2020:2024)"
+    )
   ) +
   scale_y_continuous(
     labels = scales::label_comma(scale = 1 / 1000, prefix = "", suffix = "", accuracy = 1, big.mark = ","), limits = c(0, 250000), breaks = c(0, 50000, 100000, 150000, 200000, 250000, 300000)
@@ -307,33 +350,8 @@ Crop <- ggplot(df_oats, aes(Year)) +
   scale_x_continuous(
     limits = xlimits, breaks = xbreaks, labels = xaxislabels
   ) +
-  geom_line(data=subset(df_oats, Year < CurrentYear),
-            aes(y = Oats_Production),
-            color = "#00833E", size = 1.75, linetype = "solid"
-  ) +
-  geom_line(data=subset(df_oats, Year>CurrentYear-2),
-            aes(y = Oats_Production),
-            color = "#00833E", size = 1.75, linetype = '11'
-  ) +
-  geom_point(data=subset(df_oats, Year==CurrentYear),
-             aes(y = Oats_Production),
-             color = "#00833E", size = 5
-  )+
-  annotate(
-    "text",
-    x = CurrentYear, y = df_oats$Oats_Production[df_oats$Year==CurrentYear]+20000, 
-    label = format((round(df_oats$Oats_Production[df_oats$Year==CurrentYear],-3)/1000), big.mark=","), 
-    size = 6, color = "#00833E"
-  )+
-  annotate(
-    "text",
-    x = CurrentYear-7.5, y = 155000, label = "Oats production", size = 6, color = "#00833E"
-  ) +
-  labs(
-    title = "",  y = "Thousand tonnes", x = "Year"
-  ) +
-  theme_set(
-    theme_resas
+  labs(y = "Thousand tonnes", x = "Year") +
+  theme_set(theme_resas
   ) +
   theme(
     plot.title = element_text(size = 17, hjust = 0.5),
@@ -342,7 +360,8 @@ Crop <- ggplot(df_oats, aes(Year)) +
     axis.text.y = element_text(size = 16),
     strip.text = element_text(size = 15),
     panel.grid.minor = element_blank(),
-    legend.position = "none"
+    legend.position = "top",
+    legend.text = element_text(size = 16),
   )
 
 Crop
@@ -367,50 +386,76 @@ Crop <- ggplot(df_wheat, aes(Year)) +
     data = df_wheat_mean_5yr,
     aes(
       x = 2020, xend = 2025,
-      y = Wheat_Production, yend = Wheat_Production
+      y = Wheat_Production, yend = Wheat_Production,
+      color = "Five-year average (2020:2024)"
     ),
-    color = "#575756", linetype = "solid", size = 0.75
+    size = 0.75
   ) +
-  annotate(
-    "text",
-    x = 2022.4, y = df_wheat_mean_5yr$Wheat_Production -60000,
-    label = "Five-year average",
-    size = 6, color = "#575756"
+  
+  # Wheat production: past (solid)
+  geom_line(
+    data = subset(df_wheat, Year < CurrentYear),
+    aes(y = Wheat_Production, color = "Wheat production"),
+    size = 2, linetype = "solid"
   ) +
+  
+  # Wheat production: recent/projection (dashed)
+  geom_line(
+    data = subset(df_wheat, Year > CurrentYear - 2),
+    aes(y = Wheat_Production, color = "Wheat production"),
+    size = 2, linetype = "11"
+  ) +
+  
+  # Current year point (excluded from legend)
+  geom_point(
+    data = subset(df_wheat, Year == CurrentYear),
+    aes(y = Wheat_Production, color = "Wheat production"),
+    size = 5,
+    show.legend = FALSE
+  ) +
+  
+  # Current year label (excluded from legend)
+  geom_text(
+    data = subset(df_wheat, Year == CurrentYear),
+    aes(
+      y = Wheat_Production,
+      label = format((round(Wheat_Production, -3) / 1000), big.mark = ","),
+      color = "Wheat production"
+    ),
+    size = 6, vjust = -1,
+    show.legend = FALSE
+  ) +
+  
+  # Make legend text same color as lines
+  guides(
+    color = guide_legend(
+      override.aes = list(
+        color = c("#00833E", "black")   # match legend key colors
+      )
+    )
+  ) +
+  
+  # Manual legend colors
+  scale_color_manual(
+    name = NULL,
+    values = c(
+      "Wheat production" = "#00833E",
+      "Five-year average (2020:2024)" = "black"
+    ),
+    breaks = c(
+      "Wheat production",
+      "Five-year average (2020:2024)"
+    )
+  ) +
+  # Axis and theme
   scale_y_continuous(
     labels = scales::label_comma(scale = 1 / 1000, prefix = "", suffix = "", accuracy = 1, big.mark = ","), limits = c(0, 1250000), breaks = c(0, 250000, 500000, 750000, 1000000, 1250000)
   ) +
   scale_x_continuous(
     limits = xlimits, breaks = xbreaks, labels = xaxislabels
   ) +
-  geom_line(data=subset(df_wheat, Year < CurrentYear),
-            aes(y = Wheat_Production), 
-            color = "#00833E", size = 1.75, linetype = "solid",
-  ) +
-  geom_line(data=subset(df_wheat, Year>CurrentYear-2),
-            aes(y = Wheat_Production),
-            color = "#00833E", size = 1.75, linetype = '11'
-  ) +
-  geom_point(data=subset(df_wheat, Year==CurrentYear),
-             aes(y = Wheat_Production),
-             color = "#00833E", size = 5
-  )+
-  annotate(
-    "text",
-    x = CurrentYear, y = df_wheat$Wheat_Production[df_wheat$Year==CurrentYear]+70000, 
-    label = format((round(df_wheat$Wheat_Production[df_wheat$Year==CurrentYear],-3)/1000), big.mark=","), 
-    size = 6, color = "#00833E"
-  )+
-  annotate(
-    "text",
-    x = CurrentYear-7.5, y = 970000, label = "Wheat production", size = 6, color = "#00833E"
-  ) +
-  labs(
-    title = "",  y = "Thousand tonnes", x = "Year"
-  ) +
-  theme_set(
-    theme_resas
-  ) +
+  labs(y = "Thousand tonnes", x = "Year") +
+  theme_set(theme_resas) +
   theme(
     plot.title = element_text(size = 17, hjust = 0.5),
     axis.title = element_text(size = 19),
@@ -418,8 +463,12 @@ Crop <- ggplot(df_wheat, aes(Year)) +
     axis.text.y = element_text(size = 16),
     strip.text = element_text(size = 15),
     panel.grid.minor = element_blank(),
-    legend.position = "none"
+    legend.position = "top",
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.text = element_text(size = 16),
+    legend.box = "horizontal"
   )
+
 
 Crop
 
@@ -444,50 +493,76 @@ Crop <- ggplot(df_osr, aes(Year)) +
     data = df_osr_mean_5yr,
     aes(
       x = 2020, xend = 2025,
-      y = OSR_Production, yend = OSR_Production
+      y = OSR_Production, yend = OSR_Production,
+      color = "Five-year average (2020:2024)"
     ),
-    color = "#575756", linetype = "solid", size = 0.75
+    size = 0.75
   ) +
-  annotate(
-    "text",
-    x = 2022.75, y = df_osr_mean_5yr$OSR_Production -10000,
-    label = "Five-year average (2020:2024)",
-    size = 6, color = "#575756"
+  
+  # Oilseed rape production: past (solid)
+  geom_line(
+    data = subset(df_osr, Year < CurrentYear),
+    aes(y = OSR_Production, color = "Oilseed rape production"),
+    size = 2, linetype = "solid"
   ) +
+  
+  # Oilseed rape production: recent/projection (dashed)
+  geom_line(
+    data = subset(df_osr, Year > CurrentYear - 2),
+    aes(y = OSR_Production, color = "Oilseed rape production"),
+    size = 2, linetype = "11"
+  ) +
+  
+  # Current year point (excluded from legend)
+  geom_point(
+    data = subset(df_osr, Year == CurrentYear),
+    aes(y = OSR_Production, color = "Oilseed rape production"),
+    size = 5,
+    show.legend = FALSE
+  ) +
+  
+  # Current year label (excluded from legend)
+  geom_text(
+    data = subset(df_osr, Year == CurrentYear),
+    aes(
+      y = OSR_Production,
+      label = format((round(OSR_Production, -3) / 1000), big.mark = ","),
+      color = "Oilseed rape production"
+    ),
+    size = 6, vjust = -1,
+    show.legend = FALSE
+  ) +
+  
+  # Make legend text same color as lines
+  guides(
+    color = guide_legend(
+      override.aes = list(
+        color = c("#00833E", "black")   # match legend key colors
+      )
+    )
+  ) +
+  
+  # Manual legend colors
+  scale_color_manual(
+    name = NULL,
+    values = c(
+      "Oilseed rape production" = "#00833E",
+      "Five-year average (2020:2024)" = "black"
+    ),
+    breaks = c(
+      "Oilseed rape production",
+      "Five-year average (2020:2024)"
+    )
+  ) +
+  # Axis and theme
   scale_y_continuous(
     labels = scales::label_comma(scale = 1 / 1000, prefix = "", suffix = "", accuracy = 1, big.mark = ","), limits = c(0, 200000)
   ) +
   scale_x_continuous(
     limits = xlimits , breaks = xbreaks, labels = xaxislabels
   ) +
-  geom_line(data=subset(df_osr, Year < CurrentYear),
-            aes(y = OSR_Production),
-            color = "#00833E", size = 1.75, linetype = "solid"
-  ) +
-  geom_line(data=subset(df_osr, Year>CurrentYear-2),
-            aes(y = OSR_Production),
-            color = "#00833E", size = 1.75, linetype = '11'
-  ) +
-  geom_point(data=subset(df_osr, Year==CurrentYear),
-             aes(y = OSR_Production),
-             color = "#00833E", size = 5
-  )+
-  annotate(
-    "text",
-    x = CurrentYear, y = df_osr$OSR_Production[df_osr$Year==CurrentYear]+12000, 
-    label = format((round(df_osr$OSR_Production[df_osr$Year==CurrentYear],-3)/1000), big.mark=","), 
-    size = 6, color = "#00833E"
-  )+
-  annotate(
-    "text",
-    x = CurrentYear-7.5, y = 155000, label = "Oilseed rape production", size = 6, color = "#00833E"
-  ) +
-  labs(
-    title = "", y = "Thousand tonnes", x = "Year"
-  ) +
-  theme_set(
-    theme_resas
-  ) +
+  labs(y = "Thousand tonnes", x = "Year") +
+  theme_set(theme_resas) +
   theme(
     plot.title = element_text(size = 17, hjust = 0.5),
     axis.title = element_text(size = 19),
@@ -495,8 +570,10 @@ Crop <- ggplot(df_osr, aes(Year)) +
     axis.text.y = element_text(size = 16),
     strip.text = element_text(size = 15),
     panel.grid.minor = element_blank(),
-    legend.position = "none"
+    legend.position = "top",
+    legend.text = element_text(size = 16),
   )
+
 
 Crop
 
