@@ -44,8 +44,10 @@ production <- ch_data %>%
   select(c(Year, contains("production"))) %>%
   filter(Year > (CurrentYear-10))
 
-
+################################################################################
 ########################### Total cereals ######################################
+################################################################################
+
 df_total_cereals <- data.frame(production$Year, production$Cereals_Production) %>%
   setNames(c("Year", "Cereals_Production"))
 
@@ -151,6 +153,7 @@ ggsave(filename = paste0("CH_",CurrentYear,"_cereals_production.svg"), plot = Cr
 
 ################################################################################
 ############################## Barley Crop #####################################
+################################################################################
 
 df_barley <- ch_data %>%
   select(c(Year, contains("Barley_Production"))) %>%
@@ -275,6 +278,7 @@ ggsave(filename = paste0("CH_",CurrentYear,"_barley_production.svg"), plot = Cro
 
 ################################################################################
 #################################### Oats Crop #################################
+################################################################################
 
 df_oats <- ch_data %>%
   select(c(Year, contains("Oats_Production"))) %>%
@@ -368,8 +372,9 @@ Crop
 
 ggsave(filename = paste0("CH_",CurrentYear,"_oats_production.svg"), Crop, width = SVGWidth, height = SVGHeight, units = "mm", dpi = "retina", bg = "white")
 
-####################################################################################################
-# Alex - Wheat Crop
+################################################################################
+######################### Alex - Wheat #########################################
+################################################################################
 
 df_wheat <- ch_data %>%
   select(c(Year, contains("Wheat_Production"))) %>%
@@ -434,7 +439,6 @@ Crop <- ggplot(df_wheat, aes(Year)) +
       )
     )
   ) +
-  
   # Manual legend colors
   scale_color_manual(
     name = NULL,
@@ -469,14 +473,14 @@ Crop <- ggplot(df_wheat, aes(Year)) +
     legend.box = "horizontal"
   )
 
-
 Crop
 
 ggsave(filename = paste0("CH_",CurrentYear,"_wheat_production.svg"), plot = Crop, width = SVGWidth, height = SVGHeight, units = "mm", dpi = "retina", bg = "white")
 
 
-####################################################################################################
-# Alex - OSR Crop
+################################################################################
+###################################### OSR #####################################
+################################################################################
 
 df_osr <- ch_data %>%
   select(c(Year, contains("OSR_Production"))) %>%
@@ -574,45 +578,6 @@ Crop <- ggplot(df_osr, aes(Year)) +
     legend.text = element_text(size = 16),
   )
 
-
 Crop
 
 ggsave(filename = paste0("CH_",CurrentYear,"_osr_production.svg"), plot = Crop, width = SVGWidth, height = SVGHeight, units = "mm", dpi = "retina", bg = "white")
-
-####################################################################################################
-# ALEX - PIE CHART, WHEAT OATs BARLEY
-# 
-# library(dplyr)
-# library(plotly)
-# library(reticulate)
-# 
-# ch_data_pie <- ch_data %>%
-#   select(c(Year, contains("Production"))) %>%
-#   filter(Year == CurrentYear) %>%
-#   mutate(Barley_Production = S_Barley_Production + W_Barley_Production) %>%
-#   select(Barley_Production, Wheat_Production, Oats_Production)
-# 
-# ch_data_pie <- as.data.frame(t(ch_data_pie))
-# ch_data_pie <- setNames(ch_data_pie, c("Value"))
-# ch_data_pie$per <- 100*ch_data_pie$Value/sum(ch_data_pie$Value)
-# ch_data_pie$Crop <- c('Barley','Wheat','Oats')
-# ch_data_pie$per <- round(ch_data_pie$per, digits = 0)
-# 
-# # create plot labels
-# labels = paste0(ch_data_pie$Crop, "\n ",ch_data_pie$per, big.mark = "%")
-# 
-# # create plot
-# pie_plot <- plot_ly(ch_data_pie,
-#                     labels = ~labels,
-#                     values = ~per, type = 'pie',
-#                     textposition = 'outside',
-#                     textinfo = 'label',
-#                     hoverinfo = 'text',
-#                     text = ~paste(signif(ch_data_pie$Value/1000,digits = 5), "Thousand tonnes"),
-#                     marker = list(colors=c("#3ED581","#575756", "#00833E"), line = list(color = "White", width = 7))) %>%
-#   layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-#          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-#          font = list(family = "Arial",size = 30, color = "black"),
-#          showlegend = FALSE)
-# 
-# pie_plot
