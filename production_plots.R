@@ -52,51 +52,82 @@ df_mean_5yr <- df %>%
   summarise(mean_production = mean(Cereals_Production, na.rm = TRUE))
 
 Crop <- ggplot(df, aes(Year)) +
+  # Five-year average line
   geom_segment(
     data = df_mean_5yr,
-    aes(x = 2020, xend = 2025,y = mean_production, yend = mean_production
-        ),
-    color = "#575756", linetype = "solid", size = 0.75
+    aes(
+      x = 2020, xend = 2025,
+      y = mean_production, yend = mean_production,
+      color = "Five-year average (2020:2024)"
+    ),
+    size = 0.75
   ) +
-  annotate(
-    "text",
-    x = 2023, y = df_mean_5yr$mean_production - 110000,  # adjust y for placement
-    label = "Five-year average",
-    size = 6, color = "#575756"
+  
+  # Cereals production: past (solid)
+  geom_line(
+    data = subset(df, Year < CurrentYear),
+    aes(y = Cereals_Production, color = "Total cereals production"),
+    size = 1.5, linetype = "solid"
   ) +
-  scale_y_continuous(
-    labels = scales::label_comma(scale = 1 / 1000, prefix = "", suffix = "", accuracy = 1, big.mark = ","), limits = c(0, 3500000), breaks = c(0, 500000, 1500000, 2500000, 3500000)
+  
+  # Cereals production: recent/projection (dashed)
+  geom_line(
+    data = subset(df, Year > CurrentYear - 2),
+    aes(y = Cereals_Production, color = "Total cereals production"),
+    size = 1.5, linetype = "11"
   ) +
-  scale_x_continuous(
-    limits = xlimits, breaks = xbreaks, labels = xaxislabels
-  ) + 
-  geom_line(data = subset(df, Year < CurrentYear),
-            aes(y = Cereals_Production),
-            color = "#00833E", size = 1.5, linetype = "solid"
+  
+  # Current year point (excluded from legend)
+  geom_point(
+    data = subset(df, Year == CurrentYear),
+    aes(y = Cereals_Production, color = "Total cereals production"),
+    size = 5,
+    show.legend = FALSE
   ) +
-  geom_line(data = subset(df, Year > CurrentYear - 2),
-            aes(y = Cereals_Production),
-            color = "#00833E", size = 1.5, linetype = "11"
-  ) +
-  geom_point(data = subset(df, Year == CurrentYear),
-             aes(y = Cereals_Production),
-             color = "#00833E", size = 5
-  ) +
+  
+  # Current year label (excluded from legend)
   geom_text(
     data = subset(df, Year == CurrentYear),
-    aes(y = Cereals_Production, label = format((round(Cereals_Production, -3) / 1000), big.mark = ",")),
-    size = 6, color = "#00833E", vjust = -1
+    aes(
+      y = Cereals_Production,
+      label = format((round(Cereals_Production, -3) / 1000), big.mark = ","),
+      color = "Total cereals production"
+    ),
+    size = 6, vjust = -1,
+    show.legend = FALSE
   ) +
-  annotate(
-    "text",
-    x = CurrentYear - 5.5, y = 3300000, label = "Total cereals production", size = 6, color = "#00833E"
+  
+  # Make legend text same color as lines
+  guides(
+    color = guide_legend(
+      override.aes = list(
+        color = c("#00833E", "black")   # match legend key colors
+      )
+    )
   ) +
-  labs(
-    title = "", y = "Thousand tonnes", x = "Year"
+  
+  # Manual legend colors
+  scale_color_manual(
+    name = NULL,
+    values = c(
+      "Total cereals production" = "#00833E",
+      "Five-year average (2020:2024)" = "black"
+    ),
+    breaks = c(
+      "Total cereals production",
+      "Five-year average (2020:2024)"
+    )
   ) +
-  theme_set(
-    theme_resas
+  # Axis and theme
+  scale_y_continuous(
+    labels = scales::label_comma(scale = 1 / 1000, accuracy = 1),
+    limits = c(0, 3500000),
+    breaks = c(0, 500000, 1500000, 2500000, 3500000)
   ) +
+  scale_x_continuous(limits = xlimits, breaks = xbreaks, labels = xaxislabels
+                     ) +
+  labs(y = "Thousand tonnes", x = "Year") +
+  theme_set(theme_resas) +
   theme(
     plot.title = element_text(size = 17, hjust = 0.5),
     axis.title = element_text(size = 19),
@@ -104,7 +135,10 @@ Crop <- ggplot(df, aes(Year)) +
     axis.text.y = element_text(size = 16),
     strip.text = element_text(size = 15),
     panel.grid.minor = element_blank(),
-    legend.position = "none"
+    legend.position = "top",
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.text = element_text(size = 16),
+    legend.box = "horizontal"
   )
 
 
@@ -410,7 +444,7 @@ Crop <- ggplot(df, aes(Year)) +
   annotate(
     "text",
     x = 2022.75, y = df_mean_5yr$OSR_Production -10000,
-    label = "Five-year average",
+    label = "Five-year average (2020:2024)",
     size = 6, color = "#575756"
   ) +
   scale_y_continuous(
