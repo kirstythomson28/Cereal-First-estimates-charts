@@ -35,25 +35,28 @@ SVGHeight <- 141
 
 #Use the resas theme (modified to remove some grid lines)
 resas_theme <- source("resas_theme_modified.R")
-# setwd("")
+
+## Load data from Tables and charts excel document 
 ch_data <- read_csv("CH_data.csv")
 
+#filter for production values from the past 10 years
 production <- ch_data %>%
   select(c(Year, contains("production"))) %>%
   filter(Year > (CurrentYear-10))
 
 
-df <- data.frame(production$Year, production$Cereals_Production) %>%
+########################### Total cereals ######################################
+df_total_cereals <- data.frame(production$Year, production$Cereals_Production) %>%
   setNames(c("Year", "Cereals_Production"))
 
-df_mean_5yr <- df %>%
+df_total_cereals_mean_5yr <- df_total_cereals %>%
   filter(Year >= 2020 & Year <= 2024) %>%
   summarise(mean_production = mean(Cereals_Production, na.rm = TRUE))
 
-Crop <- ggplot(df, aes(Year)) +
+Crop <- ggplot(df_total_cereals, aes(Year)) +
   # Five-year average line
   geom_segment(
-    data = df_mean_5yr,
+    data = df_total_cereals_mean_5yr,
     aes(
       x = 2020, xend = 2025,
       y = mean_production, yend = mean_production,
@@ -64,21 +67,21 @@ Crop <- ggplot(df, aes(Year)) +
   
   # Cereals production: past (solid)
   geom_line(
-    data = subset(df, Year < CurrentYear),
+    data = subset(df_total_cereals, Year < CurrentYear),
     aes(y = Cereals_Production, color = "Total cereals production"),
     size = 1.5, linetype = "solid"
   ) +
   
   # Cereals production: recent/projection (dashed)
   geom_line(
-    data = subset(df, Year > CurrentYear - 2),
+    data = subset(df_total_cereals, Year > CurrentYear - 2),
     aes(y = Cereals_Production, color = "Total cereals production"),
     size = 1.5, linetype = "11"
   ) +
   
   # Current year point (excluded from legend)
   geom_point(
-    data = subset(df, Year == CurrentYear),
+    data = subset(df_total_cereals, Year == CurrentYear),
     aes(y = Cereals_Production, color = "Total cereals production"),
     size = 5,
     show.legend = FALSE
@@ -86,7 +89,7 @@ Crop <- ggplot(df, aes(Year)) +
   
   # Current year label (excluded from legend)
   geom_text(
-    data = subset(df, Year == CurrentYear),
+    data = subset(df_total_cereals, Year == CurrentYear),
     aes(
       y = Cereals_Production,
       label = format((round(Cereals_Production, -3) / 1000), big.mark = ","),
@@ -146,98 +149,102 @@ Crop
 ggsave(filename = paste0("CH_",CurrentYear,"_cereals_production.svg"), plot = Crop, width = SVGWidth, height = SVGHeight, units = "mm", dpi = "retina", bg = "white")
 
 
-####################################################################################################
-# Alex - Barley Crop
+################################################################################
+############################## Barley Crop #####################################
 
-df <- ch_data %>%
+df_barley <- ch_data %>%
   select(c(Year, contains("Barley_Production"))) %>%
   filter(Year > (CurrentYear-10)) %>%
   as.data.frame()
 
 # Compute 5-year averages (2020–2024) for both types
-df_mean_5yr <- df %>%
+df_barley_mean_5yr <- df_barley %>%
   filter(Year >= 2020 & Year <= 2024) %>%
   summarise(
     S_Barley_Production = mean(S_Barley_Production, na.rm = TRUE),
     W_Barley_Production = mean(W_Barley_Production, na.rm = TRUE)
   )
 
-Crop <- ggplot(df, aes(Year)) +
+Crop <- ggplot(df_barley, aes(Year)) +
   # --- 5-year average line: Spring barley ---
   geom_segment(
-    data = df_mean_5yr,
+    data = df_barley_mean_5yr,
     aes(
       x = 2020, xend = 2025,
-      y = S_Barley_Production, yend = S_Barley_Production
+      y = S_Barley_Production, yend = S_Barley_Production,
+      color = "Five-year average (2020:2024)"
     ),
-    color = "#575756", linetype = "solid", size = 0.75
-  ) +
-  annotate(
-    "text",
-    x = 2022, y = df_mean_5yr$S_Barley_Production + 85000,
-    label = "Five-year average",
-    size = 6, color = "#575756"
+    linetype = "solid", size = 0.75
   ) +
   
   # --- 5-year average line: Winter barley ---
   geom_segment(
-    data = df_mean_5yr,
+    data = df_barley_mean_5yr,
     aes(
       x = 2020, xend = 2025,
-      y = W_Barley_Production, yend = W_Barley_Production
+      y = W_Barley_Production, yend = W_Barley_Production,
+      color = "Five-year average (2020:2024)"
     ),
-    color = "#575756", linetype = "solid", size = 0.75
+    linetype = "solid", size = 0.75
   ) +
-  annotate(
-    "text",
-    x = 2022.5, y = df_mean_5yr$W_Barley_Production - 60000,
-    label = "Five-year average",
-    size = 6, color = "#575756"
-  ) +
+  # Manual colors for legend
+  scale_color_manual(
+    name = NULL,
+    values = c(
+      "Five-year average (2020:2024)" = "black",
+      "Spring barley production" = "#00833E",
+      "Winter barley production" = "#00833E"
+    ),
+    breaks = c(
+      "Spring barley production",
+      "Winter barley production",
+      "Five-year average (2020:2024)"
+    )
+  )+
   scale_y_continuous(
     labels = scales::label_comma(scale = 1 / 1000, prefix = "", suffix = "", accuracy = 1, big.mark = ","), limits = c(0, 2000000), breaks = c(0, 500000, 1000000, 1500000, 2000000)
   ) +
   scale_x_continuous(
     limits = xlimits, breaks = xbreaks, labels = xaxislabels
   ) +
-  geom_line(data=subset(df, Year<CurrentYear),
+  geom_line(data=subset(df_barley, Year<CurrentYear),
             aes(y = S_Barley_Production),
             color = "#00833E", size = 1.75, linetype = "solid"
   ) +
-  geom_line(data=subset(df, Year>CurrentYear-2),
+  geom_line(data=subset(df_barley, Year>CurrentYear-2),
             aes(y = S_Barley_Production),
             color = "#00833E", size = 1.75, linetype = '11'
   ) +
-  geom_point(data=subset(df, Year==CurrentYear),
+  geom_point(data=subset(df_barley, Year==CurrentYear),
              aes(y = S_Barley_Production),
              color = "#00833E", size = 5
   )+
   annotate(
     "text",
-    x = CurrentYear, y = df$S_Barley_Production[df$Year==CurrentYear]+100000, 
-    label = format((round(df$S_Barley_Production[df$Year==CurrentYear],-3)/1000), big.mark=","), 
+    x = CurrentYear, y = df_barley$S_Barley_Production[df_barley$Year==CurrentYear]+100000, 
+    label = format((round(df_barley$S_Barley_Production[df_barley$Year==CurrentYear],-3)/1000), big.mark=","), 
     size = 6, color = "#00833E"
   )+
   annotate(
     "text",
     x = CurrentYear-7.5, y = 1650000, label = "Spring barley production", size = 6, color = "#00833E"
   ) +
-  geom_line(data=subset(df, Year<CurrentYear),
+  geom_line(data=subset(df_barley, Year<CurrentYear),
             aes(y = W_Barley_Production),
             color = "#00833E", size = 1.75, linetype = "solid"
   ) +  
-  geom_line(data=subset(df, Year>CurrentYear-2),
+  geom_line(data=subset(df_barley, Year>CurrentYear-2),
             aes(y = W_Barley_Production),
             color = "#00833E", size = 1.75, linetype = '11'
   ) +
-  geom_point(data=subset(df, Year==CurrentYear),
+  geom_point(data=subset(df_barley, Year==CurrentYear),
              aes(y = W_Barley_Production),
              color = "#00833E", size = 5
   )+
   annotate(
     "text",
-    x = CurrentYear, y = df$W_Barley_Production[df$Year==CurrentYear]+100000, 
-    label = paste0(round(df$W_Barley_Production[df$Year==CurrentYear],-3)/1000), 
+    x = CurrentYear, y = df_barley$W_Barley_Production[df_barley$Year==CurrentYear]+100000, 
+    label = paste0(round(df_barley$W_Barley_Production[df_barley$Year==CurrentYear],-3)/1000), 
     size = 6, color = "#00833E"
   )+
   annotate(
@@ -257,7 +264,8 @@ Crop <- ggplot(df, aes(Year)) +
     axis.text.y = element_text(size = 16),
     strip.text = element_text(size = 15),
     panel.grid.minor = element_blank(),
-    legend.position = "none"
+    legend.position = "top",
+    legend.text = element_text(size = 16),
   )
 
 Crop
@@ -268,19 +276,19 @@ ggsave(filename = paste0("CH_",CurrentYear,"_barley_production.svg"), plot = Cro
 ####################################################################################################
 # Alex - Oats Crop
 
-df <- ch_data %>%
+df_oats <- ch_data %>%
   select(c(Year, contains("Oats_Production"))) %>%
   filter(Year > (CurrentYear-10)) %>%
   as.data.frame()
 
-df_mean_5yr <- df %>%
+df_oats_mean_5yr <- df_oats %>%
   filter(Year >= 2020 & Year <= 2024) %>%
   summarise(Oats_Production = mean(Oats_Production, na.rm = TRUE))
 
-Crop <- ggplot(df, aes(Year)) +
+Crop <- ggplot(df_oats, aes(Year)) +
   # 5-year average line (2020–2024)
   geom_segment(
-    data = df_mean_5yr,
+    data = df_oats_mean_5yr,
     aes(
       x = 2020, xend = 2025,
       y = Oats_Production, yend = Oats_Production
@@ -289,7 +297,7 @@ Crop <- ggplot(df, aes(Year)) +
   ) +
   annotate(
     "text",
-    x = 2022.5, y = df_mean_5yr$Oats_Production + 12000,
+    x = 2022.5, y = df_oats_mean_5yr$Oats_Production + 12000,
     label = "Five-year average",
     size = 6, color = "#575756"
   ) +
@@ -299,22 +307,22 @@ Crop <- ggplot(df, aes(Year)) +
   scale_x_continuous(
     limits = xlimits, breaks = xbreaks, labels = xaxislabels
   ) +
-  geom_line(data=subset(df, Year < CurrentYear),
+  geom_line(data=subset(df_oats, Year < CurrentYear),
             aes(y = Oats_Production),
             color = "#00833E", size = 1.75, linetype = "solid"
   ) +
-  geom_line(data=subset(df, Year>CurrentYear-2),
+  geom_line(data=subset(df_oats, Year>CurrentYear-2),
             aes(y = Oats_Production),
             color = "#00833E", size = 1.75, linetype = '11'
   ) +
-  geom_point(data=subset(df, Year==CurrentYear),
+  geom_point(data=subset(df_oats, Year==CurrentYear),
              aes(y = Oats_Production),
              color = "#00833E", size = 5
   )+
   annotate(
     "text",
-    x = CurrentYear, y = df$Oats_Production[df$Year==CurrentYear]+20000, 
-    label = format((round(df$Oats_Production[df$Year==CurrentYear],-3)/1000), big.mark=","), 
+    x = CurrentYear, y = df_oats$Oats_Production[df_oats$Year==CurrentYear]+20000, 
+    label = format((round(df_oats$Oats_Production[df_oats$Year==CurrentYear],-3)/1000), big.mark=","), 
     size = 6, color = "#00833E"
   )+
   annotate(
@@ -344,19 +352,19 @@ ggsave(filename = paste0("CH_",CurrentYear,"_oats_production.svg"), Crop, width 
 ####################################################################################################
 # Alex - Wheat Crop
 
-df <- ch_data %>%
+df_wheat <- ch_data %>%
   select(c(Year, contains("Wheat_Production"))) %>%
   filter(Year > CurrentYear-10) %>%
   as.data.frame()
 
-df_mean_5yr <- df %>%
+df_wheat_mean_5yr <- df_wheat %>%
   filter(Year >= 2020 & Year <= 2024) %>%
   summarise(Wheat_Production = mean(Wheat_Production, na.rm = TRUE))
 
-Crop <- ggplot(df, aes(Year)) +
+Crop <- ggplot(df_wheat, aes(Year)) +
   # 5-year average line (2020–2024)
   geom_segment(
-    data = df_mean_5yr,
+    data = df_wheat_mean_5yr,
     aes(
       x = 2020, xend = 2025,
       y = Wheat_Production, yend = Wheat_Production
@@ -365,7 +373,7 @@ Crop <- ggplot(df, aes(Year)) +
   ) +
   annotate(
     "text",
-    x = 2022.4, y = df_mean_5yr$Wheat_Production -60000,
+    x = 2022.4, y = df_wheat_mean_5yr$Wheat_Production -60000,
     label = "Five-year average",
     size = 6, color = "#575756"
   ) +
@@ -375,22 +383,22 @@ Crop <- ggplot(df, aes(Year)) +
   scale_x_continuous(
     limits = xlimits, breaks = xbreaks, labels = xaxislabels
   ) +
-  geom_line(data=subset(df, Year < CurrentYear),
+  geom_line(data=subset(df_wheat, Year < CurrentYear),
             aes(y = Wheat_Production), 
             color = "#00833E", size = 1.75, linetype = "solid",
   ) +
-  geom_line(data=subset(df, Year>CurrentYear-2),
+  geom_line(data=subset(df_wheat, Year>CurrentYear-2),
             aes(y = Wheat_Production),
             color = "#00833E", size = 1.75, linetype = '11'
   ) +
-  geom_point(data=subset(df, Year==CurrentYear),
+  geom_point(data=subset(df_wheat, Year==CurrentYear),
              aes(y = Wheat_Production),
              color = "#00833E", size = 5
   )+
   annotate(
     "text",
-    x = CurrentYear, y = df$Wheat_Production[df$Year==CurrentYear]+70000, 
-    label = format((round(df$Wheat_Production[df$Year==CurrentYear],-3)/1000), big.mark=","), 
+    x = CurrentYear, y = df_wheat$Wheat_Production[df_wheat$Year==CurrentYear]+70000, 
+    label = format((round(df_wheat$Wheat_Production[df_wheat$Year==CurrentYear],-3)/1000), big.mark=","), 
     size = 6, color = "#00833E"
   )+
   annotate(
@@ -421,19 +429,19 @@ ggsave(filename = paste0("CH_",CurrentYear,"_wheat_production.svg"), plot = Crop
 ####################################################################################################
 # Alex - OSR Crop
 
-df <- ch_data %>%
+df_osr <- ch_data %>%
   select(c(Year, contains("OSR_Production"))) %>%
   filter(Year > CurrentYear-10) %>%
   as.data.frame()
 
-df_mean_5yr <- df %>%
+df_osr_mean_5yr <- df_osr %>%
   filter(Year >= 2020 & Year <= 2024) %>%
   summarise(OSR_Production = mean(OSR_Production, na.rm = TRUE))
 
-Crop <- ggplot(df, aes(Year)) +
+Crop <- ggplot(df_osr, aes(Year)) +
   # 5-year average line (2020–2024)
   geom_segment(
-    data = df_mean_5yr,
+    data = df_osr_mean_5yr,
     aes(
       x = 2020, xend = 2025,
       y = OSR_Production, yend = OSR_Production
@@ -442,7 +450,7 @@ Crop <- ggplot(df, aes(Year)) +
   ) +
   annotate(
     "text",
-    x = 2022.75, y = df_mean_5yr$OSR_Production -10000,
+    x = 2022.75, y = df_osr_mean_5yr$OSR_Production -10000,
     label = "Five-year average (2020:2024)",
     size = 6, color = "#575756"
   ) +
@@ -452,22 +460,22 @@ Crop <- ggplot(df, aes(Year)) +
   scale_x_continuous(
     limits = xlimits , breaks = xbreaks, labels = xaxislabels
   ) +
-  geom_line(data=subset(df, Year < CurrentYear),
+  geom_line(data=subset(df_osr, Year < CurrentYear),
             aes(y = OSR_Production),
             color = "#00833E", size = 1.75, linetype = "solid"
   ) +
-  geom_line(data=subset(df, Year>CurrentYear-2),
+  geom_line(data=subset(df_osr, Year>CurrentYear-2),
             aes(y = OSR_Production),
             color = "#00833E", size = 1.75, linetype = '11'
   ) +
-  geom_point(data=subset(df, Year==CurrentYear),
+  geom_point(data=subset(df_osr, Year==CurrentYear),
              aes(y = OSR_Production),
              color = "#00833E", size = 5
   )+
   annotate(
     "text",
-    x = CurrentYear, y = df$OSR_Production[df$Year==CurrentYear]+12000, 
-    label = format((round(df$OSR_Production[df$Year==CurrentYear],-3)/1000), big.mark=","), 
+    x = CurrentYear, y = df_osr$OSR_Production[df_osr$Year==CurrentYear]+12000, 
+    label = format((round(df_osr$OSR_Production[df_osr$Year==CurrentYear],-3)/1000), big.mark=","), 
     size = 6, color = "#00833E"
   )+
   annotate(
