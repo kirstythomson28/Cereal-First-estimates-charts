@@ -231,7 +231,8 @@ Crop <- ggplot(df_barley, aes(Year)) +
   ) +
   geom_point(data=subset(df_barley, Year==CurrentYear),
             aes(y = S_Barley_Production, colour = "Spring barley production"),
-            size = 5,
+            shape = 15,
+            size = 4,
             show.legend = FALSE
   )+
   # Add symbols along line to help differentiate
@@ -257,7 +258,8 @@ Crop <- ggplot(df_barley, aes(Year)) +
   ) +
   geom_point(data=subset(df_barley, Year==CurrentYear),
              aes(y = W_Barley_Production, colour = "Winter barley production"),
-             size = 5,
+             shape = 17,
+             size = 4,
              show.legend = FALSE
   )+
   #add symbols along line to help differentiate
