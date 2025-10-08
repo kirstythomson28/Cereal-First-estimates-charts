@@ -195,13 +195,24 @@ Crop <- ggplot(df_barley, aes(Year)) +
     name = NULL,
     values = c(
       "Five-year average (2020:2024)" = "black",
-      "Spring barley production" = "#00833E",
-      "Winter barley production" = "#00833E"
+      "Spring barley production" = "#2C8B53",
+      "Winter barley production" = "#3ED581"
     ),
     breaks = c(
       "Spring barley production",
       "Winter barley production",
       "Five-year average (2020:2024)"
+    )
+  )+
+  guides(
+    color = guide_legend(
+      nrow = 2, #two rows in legend
+      byrow= TRUE, # fill across rows first
+      override.aes = list(
+        size = 3,
+        stroke = 1.2,
+        linewidth = 1.25
+        )
     )
   )+
   scale_y_continuous(
@@ -211,49 +222,57 @@ Crop <- ggplot(df_barley, aes(Year)) +
     limits = xlimits, breaks = xbreaks, labels = xaxislabels
   ) +
   geom_line(data=subset(df_barley, Year<CurrentYear),
-            aes(y = S_Barley_Production),
-            color = "#00833E", size = 2, linetype = "solid"
+            aes(y = S_Barley_Production, colour = "Spring barley production"),
+            size = 2, linetype = "solid"
   ) +
   geom_line(data=subset(df_barley, Year>CurrentYear-2),
-            aes(y = S_Barley_Production),
-            color = "#00833E", size = 2, linetype = '11'
+            aes(y = S_Barley_Production, colour = "Spring barley production"),
+            size = 2, linetype = '11'
   ) +
   geom_point(data=subset(df_barley, Year==CurrentYear),
-             aes(y = S_Barley_Production),
-             color = "#00833E", size = 5
+            aes(y = S_Barley_Production, colour = "Spring barley production"),
+            size = 5,
+            show.legend = FALSE
   )+
-  annotate(
-    "text",
-    x = CurrentYear, y = df_barley$S_Barley_Production[df_barley$Year==CurrentYear]+100000, 
-    label = format((round(df_barley$S_Barley_Production[df_barley$Year==CurrentYear],-3)/1000), big.mark=","), 
-    size = 6, color = "#00833E"
-  )+
-  annotate(
-    "text",
-    x = CurrentYear-7.5, y = 1650000, label = "Spring barley production", size = 6, color = "#00833E"
+  # Add symbols along line to help differentiate
+  geom_point(
+    data = subset(df_barley, Year <= CurrentYear),
+    aes(y = S_Barley_Production, colour = "Spring barley production"),
+    shape = 15,
+    size = 4
   ) +
+  annotate(
+    "text",
+    x = CurrentYear, y = df_barley$S_Barley_Production[df_barley$Year==CurrentYear]+120000, 
+    label = format((round(df_barley$S_Barley_Production[df_barley$Year==CurrentYear],-3)/1000), big.mark=","), 
+    size = 6, color = "#2C8B53"
+  )+
   geom_line(data=subset(df_barley, Year<CurrentYear),
-            aes(y = W_Barley_Production),
-            color = "#00833E", size = 2, linetype = "solid"
+            aes(y = W_Barley_Production, colour = "Winter barley production"),
+            size = 2, linetype = "solid"
   ) +  
   geom_line(data=subset(df_barley, Year>CurrentYear-2),
-            aes(y = W_Barley_Production),
-            color = "#00833E", size = 2, linetype = '11'
+            aes(y = W_Barley_Production, colour = "Winter barley production"),
+            size = 2, linetype = '11'
   ) +
   geom_point(data=subset(df_barley, Year==CurrentYear),
-             aes(y = W_Barley_Production),
-             color = "#00833E", size = 5
+             aes(y = W_Barley_Production, colour = "Winter barley production"),
+             size = 5,
+             show.legend = FALSE
   )+
-  annotate(
-    "text",
-    x = CurrentYear, y = df_barley$W_Barley_Production[df_barley$Year==CurrentYear]+100000, 
-    label = paste0(round(df_barley$W_Barley_Production[df_barley$Year==CurrentYear],-3)/1000), 
-    size = 6, color = "#00833E"
-  )+
-  annotate(
-    "text",
-    x = CurrentYear-7.5, y =  480000, label = "Winter barley production", size = 6, color = "#00833E"
+  #add symbols along line to help differentiate
+  geom_point(
+    data = subset(df_barley, Year <= CurrentYear),
+    aes(y = W_Barley_Production, colour = "Winter barley production"),
+    shape = 17,
+    size = 4
   ) +
+  annotate(
+    "text",
+    x = CurrentYear, y = df_barley$W_Barley_Production[df_barley$Year==CurrentYear]+120000, 
+    label = paste0(round(df_barley$W_Barley_Production[df_barley$Year==CurrentYear],-3)/1000), 
+    size = 6, color = "#3ED581"
+  )+
   labs(
     title = "",  y = "Thousand tonnes", x = "Year"
   ) +
@@ -269,6 +288,7 @@ Crop <- ggplot(df_barley, aes(Year)) +
     panel.grid.minor = element_blank(),
     legend.position = "top",
     legend.text = element_text(size = 16),
+    legend.direction = "vertical"
   )
 
 Crop
