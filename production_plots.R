@@ -330,7 +330,7 @@ Crop <- ggplot(df_oats, aes(Year)) +
   # Cereals production: recent/projection (dashed)
   geom_line(data=subset(df_oats, Year>CurrentYear-2),
             aes(y = Oats_Production, colour = "Oats production"),
-            size = 2, linetype = "solid"
+            size = 2, linetype = "11"
   ) +
   # Current year point (excluded from legend)
   geom_point(data=subset(df_oats, Year==CurrentYear),
